@@ -3,7 +3,7 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -32,6 +32,7 @@ async function run() {
     const bannerCollection = client.db("foodGarden").collection("bannerImage");
     const menuCollection = client.db("foodGarden").collection("menuList");
     const foodCollection = client.db("foodGarden").collection("foodList");
+    const orderCollection = client.db("foodGarden").collection("orders");
 
     app.get("/banner", async (req, res) => {
       const banners = await bannerCollection.find().toArray();
@@ -50,6 +51,29 @@ async function run() {
       const query = { foodCategory: category };
       const foods = await foodCollection.find(query).toArray();
       res.send(foods);
+    });
+
+    //order routes
+    app.get("/orders", async (req, res) => {
+      const orders = await orderCollection.find().toArray();
+
+      res.send(orders);
+    });
+
+    app.post("/orders/:id", async (req, res) => {
+      const orderedFood = req.body;
+      const id = req.params.id;
+      const query = {
+        foodId: id,
+      };
+      const existingOrder = await orderCollection.findOne(query);
+
+      if (existingOrder) {
+        return res.send({ message: "Already added" });
+      }
+
+      const ordered = await orderCollection.insertOne(orderedFood);
+      res.send(ordered);
     });
 
     await client.db("admin").command({ ping: 1 });
