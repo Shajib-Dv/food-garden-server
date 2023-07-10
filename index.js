@@ -53,6 +53,11 @@ async function run() {
       res.send(foods);
     });
 
+    app.get("/foods", async (req, res) => {
+      const foods = await foodCollection.find().toArray();
+      res.send(foods);
+    });
+
     //order routes
     app.get("/orders", async (req, res) => {
       const orders = await orderCollection.find().toArray();
