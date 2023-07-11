@@ -33,6 +33,7 @@ async function run() {
     const menuCollection = client.db("foodGarden").collection("menuList");
     const foodCollection = client.db("foodGarden").collection("foodList");
     const orderCollection = client.db("foodGarden").collection("orders");
+    const reviewCollection = client.db("foodGarden").collection("review");
 
     app.get("/banner", async (req, res) => {
       const banners = await bannerCollection.find().toArray();
@@ -58,6 +59,11 @@ async function run() {
       res.send(foods);
     });
 
+    app.get("/review", async (req, res) => {
+      const review = await reviewCollection.find().toArray();
+      res.send(review);
+    });
+
     //order routes
     app.get("/orders", async (req, res) => {
       const orders = await orderCollection.find().toArray();
@@ -79,6 +85,13 @@ async function run() {
 
       const ordered = await orderCollection.insertOne(orderedFood);
       res.send(ordered);
+    });
+
+    app.delete("/orders/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const deletedOrder = await orderCollection.deleteOne(query);
+      res.send(deletedOrder);
     });
 
     await client.db("admin").command({ ping: 1 });
